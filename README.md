@@ -1,0 +1,93 @@
+# Introspect Query
+
+[![MIT][s2]][l2] [![Latest Version][s1]][l1] [![docs][s3]][l3] [![Chat on Miaou][s4]][l4]
+
+[s1]: https://img.shields.io/crates/v/iq.svg
+[l1]: https://crates.io/crates/iq
+
+[s2]: https://img.shields.io/badge/license-MIT-blue.svg
+[l2]: LICENSE
+
+[s3]: https://docs.rs/iq/badge.svg
+[l3]: https://docs.rs/iq/
+
+[s4]: https://miaou.dystroy.org/static/shields/room.svg
+[l4]: https://miaou.dystroy.org/3768?rust
+
+
+IQ (Introspect Query) lets you query standard structs, maps, enums, arrays, tuples, and
+nested combinations of these, to get deep values with a simple path syntax.
+
+Values jut have to implement serde's `Serialize` trait.
+
+```rust
+use iq::IQ;
+use serde::{ Deserialize, Serialize };
+
+#[derive(Debug, Serialize)]
+struct Car {
+    pub engine: String,
+    pub passengers: Vec<Dog>,
+    pub driver: Dog,
+}
+#[derive(Debug, PartialEq, Serialize, Deserialize)]
+struct Dog {
+    pub name: String,
+    pub ears: u8,
+}
+
+let car = Car {
+    engine: "V8".to_string(),
+    passengers: vec![
+        Dog {
+            name: "Roverandom".to_string(),
+            ears: 1,
+        },
+        Dog {
+            name: "Laïka".to_string(),
+            ears: 2,
+        },
+    ],
+    driver: Dog {
+        name: "Rex".to_string(),
+        ears: 2,
+    },
+};
+
+// extract "primitive" values as strings with extract_primitive
+assert_eq!(car.extract_primitive("driver.ears").unwrap(), "2");
+assert_eq!(car.extract_primitive("driver.name").unwrap(), "Rex");
+assert_eq!(car.extract_primitive("passengers.1.name").unwrap(), "Laïka");
+assert_eq!(car.extract_primitive("passengers.1"), None); // it's not a primitive
+
+// extract any value as Json with extract_json
+assert_eq!(car.extract_json("wrong.path"), None);
+assert_eq!(car.extract_json("driver.ears").unwrap(), "2");
+assert_eq!(car.extract_json("driver.name").unwrap(), r#""Rex""#);
+assert_eq!(
+    car.extract_json("passengers.0").unwrap(),
+    r#"{"name":"Roverandom","ears":1}"#
+);
+assert_eq!(car.extract_json("passengers.3"), None);
+
+// extract any Deserializable value with extract_value
+assert_eq!(
+    car.extract_value("passengers.1").unwrap(),
+    Some(Dog {
+        name: "Laïka".to_string(),
+        ears: 2
+    }),
+);
+
+// You don't have to concat tokens if you build the path
+assert_eq!(
+    car.extract_primitive(vec!["passengers", "0", "ears"])
+        .unwrap(),
+    "1"
+);
+
+// Extract functions are available both as a trait and as standalone functions.
+assert_eq!(iq::extract_primitive(&car, "driver.name").unwrap(), "Rex");
+```
+
+
