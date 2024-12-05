@@ -53,7 +53,7 @@
 //! );
 //! assert_eq!(car.extract_json("passengers.3"), None);
 //!
-//! // extract any Deserializable value with extract_value
+//! // extract any deserializable value with extract_value
 //! assert_eq!(
 //!     car.extract_value("passengers.1").unwrap(),
 //!     Some(Dog {
@@ -72,6 +72,8 @@
 //! // Extract functions are available both as a trait and as standalone functions.
 //! assert_eq!(iq::extract_primitive(&car, "driver.name").unwrap(), "Rex");
 //! ```
+//!
+//! IQ also works with enums, maps, and tuples.
 //!
 
 mod diver;
