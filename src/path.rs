@@ -1,4 +1,3 @@
-
 /// A path defining a deep destination into a value.
 ///
 /// Searching with an empty path will always return None.

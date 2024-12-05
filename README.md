@@ -20,7 +20,7 @@ nested combinations of these, to get deep values with a simple path syntax.
 
 Values jut have to implement serde's `Serialize` trait.
 
-```rust
+```
 use iq::IQ;
 use serde::{ Deserialize, Serialize };
 
@@ -71,6 +71,7 @@ assert_eq!(
 assert_eq!(car.extract_json("passengers.3"), None);
 
 // extract any deserializable value with extract_value
+assert_eq!(car.extract_value("driver.ears").unwrap(), Some(2));
 assert_eq!(
     car.extract_value("passengers.1").unwrap(),
     Some(Dog {
@@ -86,7 +87,7 @@ assert_eq!(
     "1"
 );
 
-// Extract functions are available both as a trait and as standalone functions.
+// Extract functions are available both on the IQ trait and as standalone functions.
 assert_eq!(iq::extract_primitive(&car, "driver.name").unwrap(), "Rex");
 ```
 

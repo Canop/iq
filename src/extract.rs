@@ -51,7 +51,7 @@ pub fn extract_string_checked<T: Serialize, P: Into<IqPath>>(
 ///
 /// If the path is not found, or empty, return None.
 ///
-/// This function also returns None if the the Serialize implementation fails,
+/// This function also returns None if the the `Serialize` implementation fails,
 /// which should not happen with a standard implementation.
 pub fn extract_string<T: Serialize, P: Into<IqPath>>(
     source: &T,
@@ -78,7 +78,7 @@ pub fn extract_json_pretty<T: Serialize, P: Into<IqPath>>(
 }
 
 /// Extract a "primitive" value (including strings, simple enum variants, etc)
-/// as a string using the Display implementation of the deep value.
+/// as a string using the `Display` implementation of the deep value.
 pub fn extract_primitive<T: Serialize, P: Into<IqPath>>(
     source: &T,
     path: P,
@@ -86,7 +86,7 @@ pub fn extract_primitive<T: Serialize, P: Into<IqPath>>(
     extract_string(source, path, IqFormat::Primitive)
 }
 
-/// Extract a value, which must implement Deserialize, from a value, at
+/// Extract a value, which must implement `Deserialize`, from a value, at
 /// the given path.
 ///
 /// This function uses a JSON representation of the deep value as intermediate

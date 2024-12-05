@@ -3,6 +3,8 @@
 //!
 //! Values jut have to implement serde's `Serialize` trait.
 //!
+//! See the [IQ](trait.IQ.html) trait for all extract functions.
+//!
 //! ```
 //! use iq::IQ;
 //! use serde::{ Deserialize, Serialize };
@@ -54,6 +56,7 @@
 //! assert_eq!(car.extract_json("passengers.3"), None);
 //!
 //! // extract any deserializable value with extract_value
+//! assert_eq!(car.extract_value("driver.ears").unwrap(), Some(2));
 //! assert_eq!(
 //!     car.extract_value("passengers.1").unwrap(),
 //!     Some(Dog {
@@ -69,7 +72,7 @@
 //!     "1"
 //! );
 //!
-//! // Extract functions are available both as a trait and as standalone functions.
+//! // Extract functions are available both on the IQ trait and as standalone functions.
 //! assert_eq!(iq::extract_primitive(&car, "driver.name").unwrap(), "Rex");
 //! ```
 //!

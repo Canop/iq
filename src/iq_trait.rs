@@ -8,7 +8,6 @@ use {
 
 /// A trait to import if you want extract function on any `Serialize` type.
 pub trait IQ {
-
     /// Extract a "primitive" value (including strings, simple enum variants, etc)
     /// as a string using the Display implementation of the deep value.
     fn extract_primitive<P: Into<IqPath>>(
