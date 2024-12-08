@@ -20,7 +20,7 @@ nested combinations of these, to get deep values with a simple path syntax.
 
 Values jut have to implement serde's `Serialize` trait.
 
-```
+```Rust
 use iq::IQ;
 use serde::{ Deserialize, Serialize };
 
