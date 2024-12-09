@@ -11,8 +11,8 @@ use {
 
 /// The thing wich dives into a Serialize value and goes directly
 /// to the searched value.
-pub(crate) struct Diver {
-    path: IqPath,
+pub(crate) struct Diver<'p> {
+    keys: &'p [&'p str],
     next_token: usize,
     requested_seq_idx: usize,
     current_seq_idx: usize,
@@ -21,13 +21,13 @@ pub(crate) struct Diver {
     return_next_map_value: bool,
     format: IqFormat,
 }
-impl Diver {
+impl<'p> Diver<'p> {
     pub fn new(
-        path: IqPath,
+        keys: &'p [&'p str],
         format: IqFormat,
     ) -> Self {
         Self {
-            path,
+            keys,
             next_token: 0,
             requested_seq_idx: 0,
             current_seq_idx: 0,
@@ -41,7 +41,7 @@ impl Diver {
         &self,
         key: &str,
     ) -> bool {
-        self.next_token < self.path.keys.len() && key == self.path.keys[self.next_token]
+        self.next_token < self.keys.len() && key == self.keys[self.next_token]
     }
     fn on_found_with_value<T>(
         &mut self,
@@ -73,13 +73,13 @@ impl Diver {
         T: ?Sized + Serialize,
     {
         self.next_token += 1;
-        if self.next_token >= self.path.keys.len() {
+        if self.next_token >= self.keys.len() {
             return self.on_found_with_value(value);
         }
         Ok(())
     }
 }
-impl ser::Serializer for &mut Diver {
+impl ser::Serializer for &mut Diver<'_> {
     type Ok = ();
     type Error = IqInternalError;
     type SerializeSeq = Self;
@@ -280,7 +280,7 @@ impl ser::Serializer for &mut Diver {
         self,
         _len: Option<usize>,
     ) -> Result<Self::SerializeSeq, IqInternalError> {
-        self.requested_seq_idx = self.path.keys[self.next_token]
+        self.requested_seq_idx = self.keys[self.next_token]
             .parse()
             .map_err(|_| IqInternalError::IndexExpected)?;
         self.current_seq_idx = 0;
@@ -339,7 +339,7 @@ impl ser::Serializer for &mut Diver {
         Ok(self)
     }
 }
-impl ser::SerializeSeq for &mut Diver {
+impl ser::SerializeSeq for &mut Diver<'_> {
     type Ok = ();
     type Error = IqInternalError;
     fn serialize_element<T>(
@@ -361,7 +361,7 @@ impl ser::SerializeSeq for &mut Diver {
     }
 }
 
-impl ser::SerializeTuple for &mut Diver {
+impl ser::SerializeTuple for &mut Diver<'_> {
     type Ok = ();
     type Error = IqInternalError;
     fn serialize_element<T>(
@@ -383,7 +383,7 @@ impl ser::SerializeTuple for &mut Diver {
     }
 }
 
-impl ser::SerializeTupleStruct for &mut Diver {
+impl ser::SerializeTupleStruct for &mut Diver<'_> {
     type Ok = ();
     type Error = IqInternalError;
 
@@ -408,7 +408,7 @@ impl ser::SerializeTupleStruct for &mut Diver {
 }
 
 // TODO not sure I correctly handled this thing
-impl ser::SerializeTupleVariant for &mut Diver {
+impl ser::SerializeTupleVariant for &mut Diver<'_> {
     type Ok = ();
     type Error = IqInternalError;
 
@@ -427,7 +427,7 @@ impl ser::SerializeTupleVariant for &mut Diver {
     }
 }
 
-impl ser::SerializeMap for &mut Diver {
+impl ser::SerializeMap for &mut Diver<'_> {
     type Ok = ();
     type Error = IqInternalError;
     fn serialize_key<T>(
@@ -442,10 +442,10 @@ impl ser::SerializeMap for &mut Diver {
         // For complex composite keys, a specific query language might be needed.
         let key = serde_json::to_string(_key)?;
         self.accept_next_map_value =
-            key.trim_matches('"') == self.path.keys[self.next_token].trim_matches('"');
+            key.trim_matches('"') == self.keys[self.next_token].trim_matches('"');
         if self.accept_next_map_value {
             self.next_token += 1;
-            if self.next_token >= self.path.keys.len() {
+            if self.next_token >= self.keys.len() {
                 self.return_next_map_value = true;
             }
         }
@@ -471,7 +471,7 @@ impl ser::SerializeMap for &mut Diver {
     }
 }
 
-impl ser::SerializeStruct for &mut Diver {
+impl ser::SerializeStruct for &mut Diver<'_> {
     type Ok = ();
     type Error = IqInternalError;
     fn serialize_field<T>(
@@ -495,7 +495,7 @@ impl ser::SerializeStruct for &mut Diver {
 
 // Similar to `SerializeTupleVariant`, here the `end` method is responsible for
 // closing both of the curly braces opened by `serialize_struct_variant`.
-impl ser::SerializeStructVariant for &mut Diver {
+impl ser::SerializeStructVariant for &mut Diver<'_> {
     type Ok = ();
     type Error = IqInternalError;
     fn serialize_field<T>(

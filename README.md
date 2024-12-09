@@ -19,8 +19,11 @@ IQ (Introspect Query) lets you query standard structs, maps, enums, arrays, tupl
 nested combinations of these, to get deep values with a simple path syntax.
 
 Values jut have to implement serde's `Serialize` trait.
+Bot values and queries are dynamic, and can be provided at runtime.
 
-```Rust
+See the [IQ](trait.IQ.html) trait for all extract functions.
+
+```rust
 use iq::IQ;
 use serde::{ Deserialize, Serialize };
 
@@ -89,7 +92,13 @@ assert_eq!(
 
 // Extract functions are available both on the IQ trait and as standalone functions.
 assert_eq!(iq::extract_primitive(&car, "driver.name").unwrap(), "Rex");
+
+
+// If iq is compied with the "template" feature, you get a mini templating utility
+let template = iq::Template::new("{driver.name} drives a {engine} car.");
+assert_eq!(template.render(&car), "Rex drives a V8 car.");
+
 ```
 
-IQ also works with enums, maps, and tuples.
+IQ also works with enums, maps, and tuples: more tests can be found in libs.rs.
 
