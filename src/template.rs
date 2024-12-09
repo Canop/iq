@@ -13,6 +13,13 @@ enum Token {
     IqPath(Vec<String>),
 }
 
+/// A template that can be rendered with data.
+///
+/// ```
+/// let template = iq::Template::new("test {1}");
+/// let data = ('a', 'b');
+/// assert_eq!(template.render(data), "test b");
+/// ```
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Template {
     tokens: Vec<Token>,

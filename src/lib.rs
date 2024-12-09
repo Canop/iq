@@ -86,6 +86,8 @@
 //! IQ also works with enums, maps, and tuples: more tests can be found in libs.rs.
 //!
 
+#![cfg_attr(docsrs, feature(doc_cfg))]
+
 mod diver;
 mod errors;
 mod extract;
@@ -103,6 +105,7 @@ pub use {
 };
 
 #[cfg(feature = "template")]
+#[cfg_attr(docsrs, doc(cfg(feature = "template")))]
 pub use template::*;
 
 #[cfg(test)]
