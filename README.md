@@ -94,7 +94,7 @@ assert_eq!(
 assert_eq!(iq::extract_primitive(&car, "driver.name").unwrap(), "Rex");
 
 
-// If iq is compied with the "template" feature, you get a mini templating utility
+// If iq is compiled with the "template" feature, you get a mini templating utility
 let template = iq::Template::new("{driver.name} drives a {engine} car.");
 assert_eq!(template.render(&car), "Rex drives a V8 car.");
 
