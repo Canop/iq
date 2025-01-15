@@ -19,7 +19,9 @@ IQ (Introspect Query) lets you query standard structs, maps, enums, arrays, tupl
 nested combinations of these, to get deep values with a simple path syntax.
 
 Values jut have to implement serde's `Serialize` trait.
-Bot values and queries are dynamic, and can be provided at runtime.
+Both values and queries are dynamic, and can be provided at runtime.
+
+IQ is efficient: the explored value isn't serialized, the `Serialize` trait is used to visit it and the visit goes only to the desired target, skipping other branches.
 
 See the [IQ](trait.IQ.html) trait for all extract functions.
 
