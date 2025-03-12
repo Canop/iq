@@ -45,6 +45,7 @@ pub fn extract_string_checked<T: Serialize, P: IqPath>(
         Err(IqInternalError::Message(msg)) => Err(IqError::Serde(msg)),
         Err(IqInternalError::Json(err)) => Err(IqError::Json(err)),
         Err(IqInternalError::IndexExpected) => Ok(None), // path doesn't match
+        Err(IqInternalError::OutOfBounds) => Ok(None),   // path doesn't match
     }
 }
 /// Extract a string from a structure at a given path, with a given format.

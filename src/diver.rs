@@ -280,7 +280,10 @@ impl ser::Serializer for &mut Diver<'_> {
         self,
         _len: Option<usize>,
     ) -> Result<Self::SerializeSeq, IqInternalError> {
-        self.requested_seq_idx = self.keys[self.next_token]
+        self.requested_seq_idx = self
+            .keys
+            .get(self.next_token)
+            .ok_or(IqInternalError::OutOfBounds)?
             .parse()
             .map_err(|_| IqInternalError::IndexExpected)?;
         self.current_seq_idx = 0;

@@ -208,14 +208,20 @@ mod tests {
         let mut world = World::default();
         world.targets.insert("Earth".to_string(), (1, 2, 3));
         world.targets.insert("Moon".to_string(), (4, 5, 6));
-        world.masters.insert(Realm::Fantasy, Dog {
-            name: "Roverandom".to_string(),
-            ears: 1,
-        });
-        world.masters.insert(Realm::Real, Dog {
-            name: "Laïka".to_string(),
-            ears: 2,
-        });
+        world.masters.insert(
+            Realm::Fantasy,
+            Dog {
+                name: "Roverandom".to_string(),
+                ears: 1,
+            },
+        );
+        world.masters.insert(
+            Realm::Real,
+            Dog {
+                name: "Laïka".to_string(),
+                ears: 2,
+            },
+        );
 
         assert_eq!(world.extract_primitive("targets.Earth.1").unwrap(), "2");
         assert_eq!(world.extract_json("targets.Moon").unwrap(), "[4,5,6]");

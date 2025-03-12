@@ -10,6 +10,7 @@ pub(crate) enum IqInternalError {
     Json(serde_json::Error),
     Found(String),
     IndexExpected,
+    OutOfBounds,
 }
 impl std::error::Error for IqInternalError {}
 impl ser::Error for IqInternalError {
@@ -31,6 +32,7 @@ impl fmt::Display for IqInternalError {
             Self::Message(msg) => write!(formatter, "IQ Error: {}", msg),
             Self::Json(err) => write!(formatter, "IQ Error: JSON: {}", err),
             Self::IndexExpected => write!(formatter, "IQ Error: Index expected"),
+            Self::OutOfBounds => write!(formatter, "IQ Error: Out of bounds"),
             Self::Found(_) => write!(formatter, "IQ Error: Found"),
         }
     }
