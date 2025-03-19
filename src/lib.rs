@@ -79,7 +79,7 @@
 //! // Extract functions are available both on the IQ trait and as standalone functions.
 //! assert_eq!(iq::extract_primitive(&car, "driver.name").unwrap(), "Rex");
 //!
-//! // You can extract the size of the deep // array/tuple/map/struct/string
+//! // You can extract the size of the deep array/tuple/map/struct/string
 //! assert_eq!(car.extract_size("passengers"), Some(2)); // count of array items
 //! assert_eq!(car.extract_size("passengers.1.name"), Some(5)); // count of chars in "Laïka"
 //! assert_eq!(car.extract_size("passengers.1"), Some(2)); // count of fields in the Dog struct
