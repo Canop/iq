@@ -37,6 +37,12 @@ pub trait IQ {
         &self,
         path: P,
     ) -> Result<Option<V>, IqError>;
+
+    /// Extract the size of the string/tuple/map/vec/struct at the given path
+    fn extract_size<P: IqPath>(
+        &self,
+        path: P,
+    ) -> Option<usize>;
 }
 
 impl<T> IQ for T
@@ -69,5 +75,12 @@ where
         path: P,
     ) -> Result<Option<V>, IqError> {
         extract_value(self, path)
+    }
+
+    fn extract_size<P: IqPath>(
+        &self,
+        path: P,
+    ) -> Option<usize> {
+        extract_size(self, path)
     }
 }

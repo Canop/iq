@@ -11,6 +11,9 @@ use {
 };
 
 /// Format for the extracted value
+///
+/// Warning: this enum is expected to change. Prefer to use the public
+/// functions to extract values.
 #[derive(Debug, PartialEq, Eq, Hash)]
 pub enum IqFormat {
     /// Exctract as Display, but only if the value is a "primitive"
@@ -19,6 +22,8 @@ pub enum IqFormat {
     Json,
     /// Extract as JSON, pretty
     JsonPretty,
+    /// Extract the size of the array/map/struct/tupple/string at the end of the path
+    Size,
 }
 
 /// Extract a string from a structure at a given path, with a given format.
@@ -33,11 +38,6 @@ pub fn extract_string_checked<T: Serialize, P: IqPath>(
     format: IqFormat,
 ) -> Result<Option<String>, IqError> {
     let keys: Vec<&str> = path.keys().collect();
-    if keys.is_empty() {
-        // we can't return the complete structure because we
-        // would need to determine if it's a primitive
-        return Ok(None);
-    }
     let mut diver = Diver::new(&keys, format);
     match source.serialize(&mut diver) {
         Ok(()) => Ok(None), // Not found
@@ -46,6 +46,8 @@ pub fn extract_string_checked<T: Serialize, P: IqPath>(
         Err(IqInternalError::Json(err)) => Err(IqError::Json(err)),
         Err(IqInternalError::IndexExpected) => Ok(None), // path doesn't match
         Err(IqInternalError::OutOfBounds) => Ok(None),   // path doesn't match
+        Err(IqInternalError::Count(n)) => Ok(Some(n.to_string())),
+        Err(IqInternalError::NoCount) => Ok(None),
     }
 }
 /// Extract a string from a structure at a given path, with a given format.
@@ -100,4 +102,26 @@ pub fn extract_value<T: Serialize, P: IqPath, V: DeserializeOwned>(
     let json = extract_string_checked(source, path, IqFormat::Json)?;
     let value = json.map(|json| serde_json::from_str(&json)).transpose()?;
     Ok(value)
+}
+
+/// Extract the size of the array/map/struct/tupple/string at the end of the path
+pub fn extract_size<T: Serialize, P: IqPath>(
+    source: &T,
+    path: P,
+) -> Option<usize> {
+    let keys: Vec<&str> = path.keys().collect();
+    if keys.first().map_or(false, |s| s.is_empty()) {
+        return Sizer::count(source);
+    }
+    let mut diver = Diver::new(&keys, IqFormat::Size);
+    match source.serialize(&mut diver) {
+        Err(IqInternalError::Count(n)) => Some(n),
+        Err(IqInternalError::NoCount) => None, // not countable
+        _ => None,                             // not found, or object not serializable
+    }
+}
+
+/// Extract the size of the array/map/struct/tupple/string of the given value
+pub fn size_of<T: Serialize>(source: &T) -> Option<usize> {
+    Sizer::count(source)
 }

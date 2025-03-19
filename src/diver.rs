@@ -63,6 +63,10 @@ impl<'p> Diver<'p> {
                 let json = serde_json::to_string_pretty(value)?;
                 Err(IqInternalError::Found(json))
             }
+            IqFormat::Size => match Sizer::count(value) {
+                Some(count) => Err(IqInternalError::Count(count)),
+                None => Err(IqInternalError::NoCount),
+            },
         }
     }
     fn incr_next_token_with_value<T>(

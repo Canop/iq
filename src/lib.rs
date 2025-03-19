@@ -79,6 +79,14 @@
 //! // Extract functions are available both on the IQ trait and as standalone functions.
 //! assert_eq!(iq::extract_primitive(&car, "driver.name").unwrap(), "Rex");
 //!
+//! // You can extract the size of the deep // array/tuple/map/struct/string
+//! assert_eq!(car.extract_size("passengers"), Some(2)); // count of array items
+//! assert_eq!(car.extract_size("passengers.1.name"), Some(5)); // count of chars in "Laïka"
+//! assert_eq!(car.extract_size("passengers.1"), Some(2)); // count of fields in the Dog struct
+//! assert_eq!(car.extract_size("passengers.3"), None); // There's no third passenger
+//! assert_eq!(car.extract_size(""), Some(3)); // count of fields in the Car struct
+//! assert_eq!(iq::size_of(&car), Some(3)); // same than previous, when you don't want to dive
+//! assert_eq!(iq::size_of(&("a", 1)), Some(2)); // works with tuples too
 //!
 //! // If iq is compiled with the "template" feature, you get a mini templating utility
 //! let template = iq::Template::new("{driver.name} drives a {engine} car.");
@@ -96,10 +104,12 @@ mod errors;
 mod extract;
 mod iq;
 mod path;
+mod sizer;
 
 #[cfg(feature = "template")]
 mod template;
 
+pub(crate) use sizer::Sizer;
 pub use {
     errors::IqError,
     extract::*,

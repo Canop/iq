@@ -3,7 +3,8 @@ use {
     std::fmt,
 };
 
-/// Internal error type for the extract operation.
+/// Internal error type for the extract operation, not really
+/// an error semantically but a short-circuiting mechanism.
 #[derive(Debug)]
 pub(crate) enum IqInternalError {
     Message(String),
@@ -11,6 +12,8 @@ pub(crate) enum IqInternalError {
     Found(String),
     IndexExpected,
     OutOfBounds,
+    Count(usize),
+    NoCount,
 }
 impl std::error::Error for IqInternalError {}
 impl ser::Error for IqInternalError {
@@ -34,6 +37,8 @@ impl fmt::Display for IqInternalError {
             Self::IndexExpected => write!(formatter, "IQ Error: Index expected"),
             Self::OutOfBounds => write!(formatter, "IQ Error: Out of bounds"),
             Self::Found(_) => write!(formatter, "IQ Error: Found"),
+            Self::Count(count) => write!(formatter, "IQ Error: Count: {}", count),
+            Self::NoCount => write!(formatter, "IQ Error: No Count"),
         }
     }
 }
