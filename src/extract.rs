@@ -110,7 +110,7 @@ pub fn extract_size<T: Serialize, P: IqPath>(
     path: P,
 ) -> Option<usize> {
     let keys: Vec<&str> = path.keys().collect();
-    if keys.first().map_or(false, |s| s.is_empty()) {
+    if keys.first().map_or(true, |s| s.is_empty()) {
         return Sizer::count(source);
     }
     let mut diver = Diver::new(&keys, IqFormat::Size);
@@ -124,4 +124,26 @@ pub fn extract_size<T: Serialize, P: IqPath>(
 /// Extract the size of the array/map/struct/tupple/string of the given value
 pub fn size_of<T: Serialize>(source: &T) -> Option<usize> {
     Sizer::count(source)
+}
+
+#[test]
+fn test_extract_size(){
+    #[derive(Debug, PartialEq, Serialize)]
+    struct Thing {
+        pub coord: (&'static str, i16),
+        pub name: String,
+        pub v: Vec<i16>,
+    }
+    let thing = Thing {
+        coord: ("Earth", 4),
+        name: "some name".to_string(),
+        v: vec![1, 2, 3, 4],
+    };
+    assert_eq!(extract_size(&thing, "coord").unwrap(), 2);
+    assert_eq!(extract_size(&thing, "coord.0").unwrap(), 5);
+    assert_eq!(extract_size(&thing, vec!["coord", "0"]).unwrap(), 5);
+    assert_eq!(extract_size(&thing, "name").unwrap(), 9);
+    assert_eq!(extract_size(&thing, "v").unwrap(), 4);
+    assert_eq!(extract_size(&thing, "").unwrap(), 3);
+    assert_eq!(extract_size(&thing, vec![]).unwrap(), 3);
 }
