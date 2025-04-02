@@ -37,6 +37,9 @@ impl<'p> Diver<'p> {
             format,
         }
     }
+    pub fn set_return_next_primitive(&mut self) {
+        self.return_next_primitive = true;
+    }
     fn has_next_token(
         &self,
         key: &str,

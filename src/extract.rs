@@ -14,7 +14,7 @@ use {
 ///
 /// Warning: this enum is expected to change. Prefer to use the public
 /// functions to extract values.
-#[derive(Debug, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum IqFormat {
     /// Exctract as Display, but only if the value is a "primitive"
     Primitive,
@@ -28,7 +28,7 @@ pub enum IqFormat {
 
 /// Extract a string from a structure at a given path, with a given format.
 ///
-/// If the path is not found, or empty, return None.
+/// If the path is not found, return None.
 ///
 /// May theorethically return an error (eg if structure serialization fails),
 /// but most users should probably use one of the simpler other functions.
@@ -39,6 +39,26 @@ pub fn extract_string_checked<T: Serialize, P: IqPath>(
 ) -> Result<Option<String>, IqError> {
     let keys: Vec<&str> = path.keys().collect();
     let mut diver = Diver::new(&keys, format);
+    if keys.is_empty() {
+        match format {
+            IqFormat::Primitive => {
+                diver.set_return_next_primitive();
+            }
+            IqFormat::Json => {
+                return serde_json::to_string(source)
+                    .map_err(IqError::Json)
+                    .map(Some);
+            }
+            IqFormat::JsonPretty => {
+                return serde_json::to_string_pretty(source)
+                    .map_err(IqError::Json)
+                    .map(Some);
+            }
+            IqFormat::Size => {
+                return Ok(Sizer::count(source).map(|n| n.to_string()));
+            }
+        }
+    }
     match source.serialize(&mut diver) {
         Ok(()) => Ok(None), // Not found
         Err(IqInternalError::Found(json)) => Ok(Some(json)),
@@ -52,7 +72,7 @@ pub fn extract_string_checked<T: Serialize, P: IqPath>(
 }
 /// Extract a string from a structure at a given path, with a given format.
 ///
-/// If the path is not found, or empty, return None.
+/// If the path is not found, return None.
 ///
 /// This function also returns None if the the `Serialize` implementation fails,
 /// which should not happen with a standard implementation.
@@ -127,7 +147,7 @@ pub fn size_of<T: Serialize>(source: &T) -> Option<usize> {
 }
 
 #[test]
-fn test_extract_size(){
+fn test_extract_size() {
     #[derive(Debug, PartialEq, Serialize)]
     struct Thing {
         pub coord: (&'static str, i16),
@@ -146,4 +166,19 @@ fn test_extract_size(){
     assert_eq!(extract_size(&thing, "v").unwrap(), 4);
     assert_eq!(extract_size(&thing, "").unwrap(), 3);
     assert_eq!(extract_size(&thing, vec![]).unwrap(), 3);
+}
+
+#[test]
+fn test_extract_value_on_empty_path() {
+    #[derive(Debug, PartialEq, Serialize, serde::Deserialize)]
+    struct Apple {
+        name: String,
+        v: Vec<i16>,
+    }
+    let apple = Apple {
+        name: "some name".to_string(),
+        v: vec![1, 2, 3, 4],
+    };
+    let extracted = extract_value(&apple, vec![]).unwrap();
+    assert_eq!(extracted, Some(apple));
 }
